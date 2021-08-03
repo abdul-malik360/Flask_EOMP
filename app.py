@@ -107,7 +107,7 @@ app = Flask(__name__)
 CORS(app)                                           # allows you to use api
 app.debug = True                                    # when finds a bug, it continues to run
 app.config['SECRET_KEY'] = 'super-secret'           # a random key used to encrypt your web app
-app.config["JWT_EXPIRATION_DELTA"] = datetime.timedelta(days=1)
+app.config["JWT_EXPIRATION_DELTA"] = datetime.timedelta(days=1)  # allows token to last a day
 
 jwt = JWT(app, authenticate, identity)              # using authenticate and identity functions for jwt
 
@@ -175,8 +175,7 @@ def view_user(Username):
     response = {}
     with sqlite3.connect('notused.db') as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM Register WHERE Username=" + str(Username))
-
+        cursor.execute("SELECT * FROM Register WHERE Username='" + str(Username) + "'")
         response["status_code"] = 200
         response["description"] = "User retrieved successfully"
         response["data"] = cursor.fetchone()
