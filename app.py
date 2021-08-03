@@ -237,12 +237,14 @@ def edit_product(prod_list):
 
             if incoming_data.get("Name") is not None:
                 put_data["Name"] = incoming_data.get("Name")
+
                 with sqlite3.connect('notused.db') as conn:
                     cursor = conn.cursor()
                     cursor.execute("UPDATE Products SET Name =? WHERE prod_list=?", (put_data["Name"], prod_list))
                     conn.commit()
-                    response['message'] = "Update was successful"
+                    response['message'] = "Name update was successful"
                     response['status_code'] = 200
+
             if incoming_data.get("Type") is not None:
                 put_data['Type'] = incoming_data.get('Type')
 
@@ -250,9 +252,53 @@ def edit_product(prod_list):
                     cursor = conn.cursor()
                     cursor.execute("UPDATE Products SET Type =? WHERE prod_list=?", (put_data["Type"], prod_list))
                     conn.commit()
-                    response['Type'] = "Type Update was successful"
+                    response['message'] = "Type update was successful"
                     response['status_code'] = 200
 
+            if incoming_data.get("Description") is not None:
+                put_data["Description"] = incoming_data.get("Description")
+
+                with sqlite3.connect('notused.db') as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("UPDATE Products SET Description =? WHERE prod_list=?", (put_data["Description"], prod_list))
+                    conn.commit()
+                    response['message'] = "Description update was successful"
+                    response['status_code'] = 200
+
+            if incoming_data.get("Price") is not None:
+                put_data['Price'] = incoming_data.get('Price')
+
+                with sqlite3.connect('notused.db') as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("UPDATE Products SET Price =? WHERE prod_list=?", (put_data["Price"], prod_list))
+                    conn.commit()
+                    response['message'] = "Price update was successful"
+                    response['status_code'] = 200
+
+            if incoming_data.get("Image") is not None:
+                put_data['Image'] = incoming_data.get('Image')
+
+                with sqlite3.connect('notused.db') as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("UPDATE Products SET Image =? WHERE prod_list=?", (put_data["Image"], prod_list))
+                    conn.commit()
+                    response['message'] = "Image update was successful"
+                    response['status_code'] = 200
+
+    return response
+
+
+# a route to delete products
+@app.route("/api/delete-product/<int:prod_list>")
+@jwt_required()
+def delete_product(prod_list):
+    response = {}
+    with sqlite3.connect('notused.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM Products WHERE prod_list=" + str(prod_list))
+        conn.commit()
+        response['status_code'] = 204
+        response['message'] = "Product deleted successfully"
     return response
 
 
