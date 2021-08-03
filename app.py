@@ -149,6 +149,22 @@ def registration():
         return response
 
 
+# a route to view all the Registered users
+@app.route('/api/show-users/', methods=["GET"])
+def show_users():
+    response = {}
+
+    with sqlite3.connect("notused.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM Register")
+
+        posts = cursor.fetchall()
+
+    response['status_code'] = 200
+    response['data'] = posts
+    return response
+
+
 # a route  that requires a token with a function to add products
 @app.route('/api/add-product/', methods=["POST"])
 @jwt_required()
@@ -175,6 +191,69 @@ def add_products():
             response["status_code"] = 201
             response['description'] = "Product added successfully"
         return response
+
+
+# a route to view all the products added
+@app.route('/api/show-products/', methods=["GET"])
+def show_products():
+    response = {}
+
+    with sqlite3.connect("notused.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM Products")
+
+        posts = cursor.fetchall()
+
+    response['status_code'] = 200
+    response['data'] = posts
+    return response
+
+
+# a route to view each product by it's ID
+@app.route('/api/view-product/<int:prod_list>', methods=["GET"])
+def view_product(prod_list):
+    response = {}
+
+    with sqlite3.connect('notused.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM Products WHERE prod_list=" + str(prod_list))
+
+        response["status_code"] = 200
+        response["description"] = "Product retrieved successfully"
+        response["data"] = cursor.fetchone()
+    return jsonify(response)
+
+
+# a route to edit a product
+@app.route('/edit-product/<int:prod_list>', methods=["PUT"])
+@jwt_required()
+def edit_product(prod_list):
+    response = {}
+
+    if request.method == "PUT":
+        with sqlite3.connect('notused.db') as conn:
+            incoming_data = dict(request.json)
+            put_data = {}
+
+            if incoming_data.get("Name") is not None:
+                put_data["Name"] = incoming_data.get("Name")
+                with sqlite3.connect('notused.db') as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("UPDATE Products SET Name =? WHERE prod_list=?", (put_data["Name"], prod_list))
+                    conn.commit()
+                    response['message'] = "Update was successful"
+                    response['status_code'] = 200
+            if incoming_data.get("Type") is not None:
+                put_data['Type'] = incoming_data.get('Type')
+
+                with sqlite3.connect('notused.db') as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("UPDATE Products SET Type =? WHERE prod_list=?", (put_data["Type"], prod_list))
+                    conn.commit()
+                    response['Type'] = "Type Update was successful"
+                    response['status_code'] = 200
+
+    return response
 
 
 if __name__ == '__main__':
