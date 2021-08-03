@@ -1,6 +1,7 @@
 # importing necessary modules
 import hmac
 import sqlite3
+import datetime
 
 from flask import Flask, request, jsonify, render_template
 from flask_jwt import JWT, jwt_required, current_identity
@@ -106,6 +107,7 @@ app = Flask(__name__)
 CORS(app)                                           # allows you to use api
 app.debug = True                                    # when finds a bug, it continues to run
 app.config['SECRET_KEY'] = 'super-secret'           # a random key used to encrypt your web app
+app.config["JWT_EXPIRATION_DELTA"] = datetime.timedelta(days=1)
 
 jwt = JWT(app, authenticate, identity)              # using authenticate and identity functions for jwt
 
@@ -151,6 +153,7 @@ def registration():
 
 # a route to view all the Registered users
 @app.route('/api/show-users/', methods=["GET"])
+@jwt_required()
 def show_users():
     response = {}
 
@@ -163,6 +166,21 @@ def show_users():
     response['status_code'] = 200
     response['data'] = posts
     return response
+
+
+# a route to view a user
+@app.route('/api/view-user/<Username>', methods=["GET"])
+@jwt_required()
+def view_user(Username):
+    response = {}
+    with sqlite3.connect('notused.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM Register WHERE Username=" + str(Username))
+
+        response["status_code"] = 200
+        response["description"] = "User retrieved successfully"
+        response["data"] = cursor.fetchone()
+    return jsonify(response)
 
 
 # a route  that requires a token with a function to add products
