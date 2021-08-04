@@ -3,9 +3,60 @@ import hmac
 import sqlite3
 import datetime
 
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify
 from flask_jwt import JWT, jwt_required, current_identity
 from flask_cors import CORS
+
+
+# creating a class called point-of-sale
+class PointOfSale:
+    def __init__(self):
+        self.conn = sqlite3.connect('notused.db')              # connecting sqlite to the database called point-of-sale
+        self.cursor = self.conn.cursor()
+
+    # creating a table to register new users,
+    def register(self):
+        print("Opened Database Successfully")                                         # checking if database was created
+
+        self.conn.execute("CREATE TABLE IF NOT EXISTS Register(ID_Number TEXT NOT NULL, "  # command to create the table
+                          "Name TEXT NOT NULL,"
+                          "Surname TEXT NOT NULL,"
+                          "Email TEXT NOT NULL,"
+                          "Cell TEXT NOT NULL,"
+                          "Address TEXT NOT NULL,"
+                          "Username TEXT NOT NULL PRIMARY KEY,"
+                          "Password TEXT NOT NULL)")
+        print("Register table created successfully")                                 # checking if table was created
+        self.conn.close()
+
+        return self.register                                                         # calling the function register
+
+    # creating a table for the registered users to log in, using their username and password
+    def login(self):
+        print("Opened Database Successfully")
+
+        self.conn.execute("CREATE TABLE IF NOT EXISTS Login(Log_ID INTEGER PRIMARY KEY AUTOINCREMENT, "                 
+                          "Username TEXT NOT NULL,"
+                          "Password TEXT NOT NULL,  FOREIGN KEY(Username) REFERENCES Register(Username))")
+        print("Log table created successfully")
+        self.conn.close()
+
+        return self.login
+
+    # creating a table for the products
+    def products(self):
+        print("Opened Database Successfully")
+
+        self.conn.execute("CREATE TABLE IF NOT EXISTS Products(prod_list INTEGER PRIMARY KEY AUTOINCREMENT, "
+                          "Name TEXT NOT NULL,"
+                          "Type TEXT NOT NULL,"
+                          "Description TEXT NOT NULL,"  
+                          "Price TEXT NOT NULL,"    
+                          "Image IMAGE NOT NULL)")
+        print("Products table created successfully")
+        self.conn.close()
+
+        return self.products
 
 
 # creating a class called users, part of the flask application configuration
@@ -16,70 +67,17 @@ class User(object):
         self.password = password
 
 
-# creating a table to register new users, connecting it to a database called point-of-sale
-def register():
-    conn = sqlite3.connect('notused.db')                                          # connecting sqlite to the database
-    print("Opened Database Successfully")                                         # checking if database was created
-
-    conn.execute("CREATE TABLE IF NOT EXISTS Register(ID_Number TEXT NOT NULL, "  # executing the command to create the table
-                 "Name TEXT NOT NULL,"
-                 "Surname TEXT NOT NULL,"
-                 "Email TEXT NOT NULL,"
-                 "Cell TEXT NOT NULL,"
-                 "Address TEXT NOT NULL,"
-                 "Username TEXT NOT NULL PRIMARY KEY,"
-                 "Password TEXT NOT NULL)")
-    print("Register table created successfully")                                 # checking if table was created
-    conn.close()
-
-
-register()                                                                       # calling the function register
-
-
-# creating a table for the registered users to log in, using their username and password
-def login():
-    conn = sqlite3.connect('notused.db')
-    print("Opened Database Successfully")
-
-    conn.execute("CREATE TABLE IF NOT EXISTS Login(Log_ID INTEGER PRIMARY KEY AUTOINCREMENT, "                 
-                 "Username TEXT NOT NULL,"
-                 "Password TEXT NOT NULL,  FOREIGN KEY(Username) REFERENCES Register(Username))")
-    print("Log table created successfully")
-    conn.close()
-
-
-login()
-
-
-# creating a table for the products
-def products():
-    conn = sqlite3.connect('notused.db')
-    print("Opened Database Successfully")
-
-    conn.execute("CREATE TABLE IF NOT EXISTS Products(prod_list INTEGER PRIMARY KEY AUTOINCREMENT, "
-                 "Name TEXT NOT NULL,"
-                 "Type TEXT NOT NULL,"
-                 "Description TEXT NOT NULL,"  
-                 "Price TEXT NOT NULL,"    
-                 "Image IMAGE NOT NULL)")
-    print("Products table created successfully")
-    conn.close()
-
-
-products()
-
-
 # creating a function to get all the users from the register table
 def fetch_users():
     with sqlite3.connect('notused.db') as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM Register")
-        users = cursor.fetchall()
+        users = cursor.fetchall()                                      # to fetch all the users
 
         new_data = []
 
         for data in users:
-            new_data.append(User(data[0], data[6], data[7]))
+            new_data.append(User(data[0], data[6], data[7]))           # getting the id, username and password
     return new_data
 
 
