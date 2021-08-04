@@ -8,8 +8,8 @@ from flask_jwt import JWT, jwt_required, current_identity
 from flask_cors import CORS
 
 
-# creating a class called point-of-sale
-class PointOfSale:
+# creating a class for all the tables
+class PointOfSaleTables:
     def __init__(self):
         self.conn = sqlite3.connect('notused.db')              # connecting sqlite to the database called point-of-sale
         self.cursor = self.conn.cursor()
