@@ -6,6 +6,7 @@ import datetime
 from flask import Flask, request, jsonify
 from flask_jwt import JWT, jwt_required, current_identity
 from flask_cors import CORS
+from flask_mail import Mail, Message
 
 
 # creating a class for all the tables
@@ -107,6 +108,14 @@ app.debug = True                                    # when finds a bug, it conti
 app.config['SECRET_KEY'] = 'super-secret'           # a random key used to encrypt your web app
 app.config["JWT_EXPIRATION_DELTA"] = datetime.timedelta(days=1)  # allows token to last a day
 
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'        # following code is used to send email's through flask
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = '62545a@gmail.com'
+app.config['MAIL_PASSWORD'] = 'Dummy123!'
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+mail = Mail(app)                                    # end of email code config
+
 jwt = JWT(app, authenticate, identity)              # using authenticate and identity functions for jwt
 
 
@@ -144,8 +153,12 @@ def registration():
                            "Password) VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
                            (id_numb, name, surname, email, cell, address, username, password))
             conn.commit()
-            response["message"] = "success"
+            response["message"] = "success, Check Email"
             response["status_code"] = 201
+
+            msg = Message('Welcome To My Point Of Sale', sender='62545a@gmail.com', recipients=[email])
+            msg.body = "Thank You for registering with us " + name + "." + " Don't forget your Username: " + username + " and " "Password: " + password + "."
+            mail.send(msg)
         return response
 
 
