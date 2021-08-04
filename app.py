@@ -12,13 +12,11 @@ from flask_mail import Mail, Message
 # creating a class for all the tables
 class PointOfSaleTables:
     def __init__(self):
-        self.conn = sqlite3.connect('notused.db')              # connecting sqlite to the database called point-of-sale
+        self.conn = sqlite3.connect('point_of_sale.db')              # connecting sqlite to the database called point-of-sale
         self.cursor = self.conn.cursor()
 
     # creating a table to register new users,
     def register(self):
-        print("Opened Database Successfully")                                         # checking if database was created
-
         self.conn.execute("CREATE TABLE IF NOT EXISTS Register(ID_Number TEXT NOT NULL, "  # command to create the table
                           "Name TEXT NOT NULL,"
                           "Surname TEXT NOT NULL,"
@@ -32,32 +30,20 @@ class PointOfSaleTables:
 
         return self.register                                                         # calling the function register
 
-    # creating a table for the registered users to log in, using their username and password
-    def login(self):
-        print("Opened Database Successfully")
-
-        self.conn.execute("CREATE TABLE IF NOT EXISTS Login(Log_ID INTEGER PRIMARY KEY AUTOINCREMENT, "                 
-                          "Username TEXT NOT NULL,"
-                          "Password TEXT NOT NULL,  FOREIGN KEY(Username) REFERENCES Register(Username))")
-        print("Log table created successfully")
-        self.conn.close()
-
-        return self.login
-
     # creating a table for the products
     def products(self):
-        print("Opened Database Successfully")
-
         self.conn.execute("CREATE TABLE IF NOT EXISTS Products(prod_list INTEGER PRIMARY KEY AUTOINCREMENT, "
                           "Name TEXT NOT NULL,"
                           "Type TEXT NOT NULL,"
                           "Description TEXT NOT NULL,"  
-                          "Price TEXT NOT NULL,"    
-                          "Image IMAGE NOT NULL)")
+                          "Price TEXT NOT NULL)")
         print("Products table created successfully")
         self.conn.close()
 
         return self.products
+
+
+PointOfSaleTables()
 
 
 # creating a class called users, part of the flask application configuration
@@ -70,7 +56,7 @@ class User(object):
 
 # creating a function to get all the users from the register table
 def fetch_users():
-    with sqlite3.connect('notused.db') as conn:
+    with sqlite3.connect('point_of_sale.db') as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM Register")
         users = cursor.fetchall()                                      # to fetch all the users
@@ -122,7 +108,7 @@ jwt = JWT(app, authenticate, identity)              # using authenticate and ide
 @app.route('/protected')                            # a route to use the generated token
 @jwt_required()                                     # route only works if you have the generated token
 def protected():                                    # a function called protected for the route
-    return '%s' % current_identity                  #
+    return '%s' % current_identity
 
 
 # a route with a function to register the users
@@ -140,7 +126,7 @@ def registration():
         username = request.form['Username']
         password = request.form['Password']
 
-        with sqlite3.connect("notused.db") as conn:
+        with sqlite3.connect("point_of_sale.db") as conn:
             cursor = conn.cursor()
             cursor.execute("INSERT INTO Register("
                            "ID_Number,"
@@ -168,7 +154,7 @@ def registration():
 def show_users():
     response = {}
 
-    with sqlite3.connect("notused.db") as conn:
+    with sqlite3.connect("point_of_sale.db") as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM Register")
 
@@ -184,7 +170,7 @@ def show_users():
 @jwt_required()
 def view_user(Username):
     response = {}
-    with sqlite3.connect('notused.db') as conn:
+    with sqlite3.connect('point_of_sale.db') as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM Register WHERE Username='" + str(Username) + "'")
         response["status_code"] = 200
@@ -204,17 +190,15 @@ def add_products():
         type = request.form['Type']
         description = request.form['Description']
         price = request.form['Price']
-        image = request.form['Image']
 
-        with sqlite3.connect('notused.db') as conn:
+        with sqlite3.connect('point_of_sale.db') as conn:
             cursor = conn.cursor()
             cursor.execute("INSERT INTO Products("
                            "Name,"
                            "Type,"
                            "Description,"
-                           "Price,"
-                           "Image) VALUES(?, ?, ?, ?, ?)",
-                           (name, type, description, price, image))
+                           "Price) VALUES(?, ?, ?, ?)",
+                           (name, type, description, price))
             conn.commit()
             response["status_code"] = 201
             response['description'] = "Product added successfully"
@@ -226,7 +210,7 @@ def add_products():
 def show_products():
     response = {}
 
-    with sqlite3.connect("notused.db") as conn:
+    with sqlite3.connect("point_of_sale.db") as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM Products")
 
@@ -242,7 +226,7 @@ def show_products():
 def view_product(prod_list):
     response = {}
 
-    with sqlite3.connect('notused.db') as conn:
+    with sqlite3.connect('point_of_sale.db') as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM Products WHERE prod_list=" + str(prod_list))
 
@@ -259,14 +243,14 @@ def edit_product(prod_list):
     response = {}
 
     if request.method == "PUT":
-        with sqlite3.connect('notused.db') as conn:
+        with sqlite3.connect('point_of_sale.db') as conn:
             incoming_data = dict(request.json)
             put_data = {}
 
             if incoming_data.get("Name") is not None:
                 put_data["Name"] = incoming_data.get("Name")
 
-                with sqlite3.connect('notused.db') as conn:
+                with sqlite3.connect('point_of_sale.db') as conn:
                     cursor = conn.cursor()
                     cursor.execute("UPDATE Products SET Name =? WHERE prod_list=?", (put_data["Name"], prod_list))
                     conn.commit()
@@ -276,7 +260,7 @@ def edit_product(prod_list):
             if incoming_data.get("Type") is not None:
                 put_data['Type'] = incoming_data.get('Type')
 
-                with sqlite3.connect('notused.db') as conn:
+                with sqlite3.connect('point_of_sale.db') as conn:
                     cursor = conn.cursor()
                     cursor.execute("UPDATE Products SET Type =? WHERE prod_list=?", (put_data["Type"], prod_list))
                     conn.commit()
@@ -286,7 +270,7 @@ def edit_product(prod_list):
             if incoming_data.get("Description") is not None:
                 put_data["Description"] = incoming_data.get("Description")
 
-                with sqlite3.connect('notused.db') as conn:
+                with sqlite3.connect('point_of_sale.db') as conn:
                     cursor = conn.cursor()
                     cursor.execute("UPDATE Products SET Description =? WHERE prod_list=?", (put_data["Description"], prod_list))
                     conn.commit()
@@ -296,21 +280,11 @@ def edit_product(prod_list):
             if incoming_data.get("Price") is not None:
                 put_data['Price'] = incoming_data.get('Price')
 
-                with sqlite3.connect('notused.db') as conn:
+                with sqlite3.connect('point_of_sale.db') as conn:
                     cursor = conn.cursor()
                     cursor.execute("UPDATE Products SET Price =? WHERE prod_list=?", (put_data["Price"], prod_list))
                     conn.commit()
                     response['message'] = "Price update was successful"
-                    response['status_code'] = 200
-
-            if incoming_data.get("Image") is not None:
-                put_data['Image'] = incoming_data.get('Image')
-
-                with sqlite3.connect('notused.db') as conn:
-                    cursor = conn.cursor()
-                    cursor.execute("UPDATE Products SET Image =? WHERE prod_list=?", (put_data["Image"], prod_list))
-                    conn.commit()
-                    response['message'] = "Image update was successful"
                     response['status_code'] = 200
 
     return response
@@ -321,7 +295,7 @@ def edit_product(prod_list):
 @jwt_required()
 def delete_product(prod_list):
     response = {}
-    with sqlite3.connect('notused.db') as conn:
+    with sqlite3.connect('point_of_sale.db') as conn:
         cursor = conn.cursor()
         cursor.execute("DELETE FROM Products WHERE prod_list=" + str(prod_list))
         conn.commit()
