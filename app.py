@@ -1,8 +1,10 @@
 # importing necessary modules
 import hmac
 import sqlite3
-import datetime
+import re
+import rsaidnumber
 
+from datetime import datetime, timedelta
 from flask import Flask, request, jsonify
 from flask_jwt import JWT, jwt_required, current_identity
 from flask_cors import CORS
@@ -92,7 +94,7 @@ app = Flask(__name__)
 CORS(app)                                           # allows you to use api
 app.debug = True                                    # when finds a bug, it continues to run
 app.config['SECRET_KEY'] = 'super-secret'           # a random key used to encrypt your web app
-app.config["JWT_EXPIRATION_DELTA"] = datetime.timedelta(days=1)  # allows token to last a day
+app.config["JWT_EXPIRATION_DELTA"] = timedelta(days=1)  # allows token to last a day
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'        # following code is used to send email's through flask
 app.config['MAIL_PORT'] = 465
@@ -126,25 +128,36 @@ def registration():
         username = request.form['Username']
         password = request.form['Password']
 
-        with sqlite3.connect("point_of_sale.db") as conn:
-            cursor = conn.cursor()
-            cursor.execute("INSERT INTO Register("
-                           "ID_Number,"
-                           "Name,"
-                           "Surname,"
-                           "Email,"
-                           "Cell,"
-                           "Address,"
-                           "Username,"
-                           "Password) VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
-                           (id_numb, name, surname, email, cell, address, username, password))
-            conn.commit()
-            response["message"] = "success, Check Email"
-            response["status_code"] = 201
+        try:
+            regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'                        # code to validate email entered
+            # entry will only be accepted if email address and ID Number is valid
+            if re.search(regex, email) and rsaidnumber.parse(id_numb):
 
-            msg = Message('Welcome To My Point Of Sale', sender='62545a@gmail.com', recipients=[email])
-            msg.body = "Thank You for registering with us " + name + "." + " Don't forget your Username: " + username + " and " "Password: " + password + "."
-            mail.send(msg)
+                with sqlite3.connect("point_of_sale.db") as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("INSERT INTO Register("
+                                   "ID_Number,"
+                                   "Name,"
+                                   "Surname,"
+                                   "Email,"
+                                   "Cell,"
+                                   "Address,"
+                                   "Username,"
+                                   "Password) VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
+                                   (id_numb, name, surname, email, cell, address, username, password))
+                    conn.commit()
+
+                msg = Message('Welcome To My Point Of Sale', sender='62545a@gmail.com', recipients=[email])
+                msg.body = "Thank You for registering with us " + name + "." + " Don't forget your Username: " + username + " and " "Password: " + password + "."
+                mail.send(msg)
+
+                response["message"] = "Success, Check Email"
+                response["status_code"] = 201
+
+            else:
+                response['message'] = "Invalid Email Address"
+        except ValueError:
+            response['message'] = "Invalid ID Number"
         return response
 
 
