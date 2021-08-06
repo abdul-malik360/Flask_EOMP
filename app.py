@@ -4,7 +4,7 @@ import sqlite3
 import re
 import rsaidnumber
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 from flask import Flask, request, jsonify
 from flask_jwt import JWT, jwt_required, current_identity
 from flask_cors import CORS
@@ -37,8 +37,10 @@ class PointOfSaleTables:
         self.conn.execute("CREATE TABLE IF NOT EXISTS Products(prod_list INTEGER PRIMARY KEY AUTOINCREMENT, "
                           "Name TEXT NOT NULL,"
                           "Type TEXT NOT NULL,"
-                          "Description TEXT NOT NULL,"  
-                          "Price TEXT NOT NULL)")
+                          "Description TEXT NOT NULL,"
+                          "Price TEXT NOT NULL,"
+                          "Quantity TEXT NOT NULL,"
+                          "Total TEXT NULL)")
         print("Products table created successfully")
         self.conn.close()
 
@@ -147,7 +149,7 @@ def registration():
                                    (id_numb, name, surname, email, cell, address, username, password))
                     conn.commit()
 
-                msg = Message('Welcome To My Point Of Sale', sender='62545a@gmail.com', recipients=[email])
+                msg = Message('Welcome To Everything Pizza', sender='62545a@gmail.com', recipients=[email])
                 msg.body = "Thank You for registering with us " + name + "." + " Don't forget your Username: " + username + " and " "Password: " + password + "."
                 mail.send(msg)
 
@@ -203,6 +205,8 @@ def add_products():
         type = request.form['Type']
         description = request.form['Description']
         price = request.form['Price']
+        quantity = request.form['Quantity']
+        total = float(price) * int(quantity)
 
         with sqlite3.connect('point_of_sale.db') as conn:
             cursor = conn.cursor()
@@ -210,8 +214,11 @@ def add_products():
                            "Name,"
                            "Type,"
                            "Description,"
-                           "Price) VALUES(?, ?, ?, ?)",
-                           (name, type, description, price))
+                           "Price,"
+                           "Quantity,"
+                           "Total) "
+                           "VALUES(?, ?, ?, ?, ?, ?)",
+                           (name, type, description, price, quantity, total))
             conn.commit()
             response["status_code"] = 201
             response['description'] = "Product added successfully"
@@ -298,6 +305,16 @@ def edit_product(prod_list):
                     cursor.execute("UPDATE Products SET Price =? WHERE prod_list=?", (put_data["Price"], prod_list))
                     conn.commit()
                     response['message'] = "Price update was successful"
+                    response['status_code'] = 200
+
+            if incoming_data.get("Quantity") is not None:
+                put_data['Quantity'] = incoming_data.get('Quantity')
+
+                with sqlite3.connect('point_of_sale.db') as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("UPDATE Products SET Quantity =? WHERE prod_list=?", (put_data["Quantity"], prod_list))
+                    conn.commit()
+                    response['message'] = "Quantity update was successful"
                     response['status_code'] = 200
 
     return response
