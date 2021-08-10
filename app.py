@@ -121,14 +121,14 @@ def registration():
     response = {}
 
     if request.method == "POST":
-        id_numb = request.form['ID_Number']
-        name = request.form['Name']
-        surname = request.form['Surname']
-        email = request.form['Email']
-        cell = request.form['Cell']
-        address = request.form['Address']
-        username = request.form['Username']
-        password = request.form['Password']
+        id_numb = request.json['ID_Number']
+        name = request.json['Name']
+        surname = request.json['Surname']
+        email = request.json['Email']
+        cell = request.json['Cell']
+        address = request.json['Address']
+        username = request.json['Username']
+        password = request.json['Password']
 
         try:
             regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'                        # code to validate email entered
@@ -201,11 +201,11 @@ def add_products():
     response = {}
 
     if request.method == "POST":
-        name = request.form['Name']
-        type = request.form['Type']
-        description = request.form['Description']
-        price = request.form['Price']
-        quantity = request.form['Quantity']
+        name = request.json['Name']
+        type = request.json['Type']
+        description = request.json['Description']
+        price = request.json['Price']
+        quantity = request.json['Quantity']
         total = float(price) * int(quantity)
 
         with sqlite3.connect('point_of_sale.db') as conn:
