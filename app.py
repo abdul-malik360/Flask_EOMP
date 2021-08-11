@@ -165,7 +165,7 @@ def registration():
 
 # a route to view all the Registered users
 @app.route('/api/show-users/', methods=["GET"])
-@jwt_required()
+# @jwt_required()
 def show_users():
     response = {}
 
