@@ -194,6 +194,35 @@ def view_user(Username):
     return jsonify(response)
 
 
+# a route with a function to send the users their details
+@app.route('/api/details/', methods=["POST"])
+def details():
+    response = {}
+
+    if request.method == "POST":
+        email = request.form['Email']
+
+        regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'                        # code to validate email entered
+        # entry will only be accepted if email address and ID Number is valid
+        if re.search(regex, email):
+
+            with sqlite3.connect("point_of_sale.db") as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT * FROM Register WHERE Email='" + str(email) + "'")
+                details = cursor.fetchall()[0]
+
+            msg = Message('MyPOS: Username and Password Recovery', sender='62545a@gmail.com', recipients=[email])
+            msg.body = "Here are your details " + str(details[1]) + ". Username: " + str(details[6]) + ", Password: " + str(details[7])
+            mail.send(msg)
+
+            response["message"] = "Success, Check Email"
+            response["status_code"] = 201
+
+        else:
+            response['message'] = "Invalid Email Address"
+    return response
+
+
 # a route  that requires a token with a function to add products
 @app.route('/api/add-product/', methods=["POST"])
 @jwt_required()
