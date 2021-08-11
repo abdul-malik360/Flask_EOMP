@@ -149,7 +149,7 @@ def registration():
                                    (id_numb, name, surname, email, cell, address, username, password))
                     conn.commit()
 
-                msg = Message('Welcome To Everything Pizza', sender='62545a@gmail.com', recipients=[email])
+                msg = Message('Welcome To MyPOS', sender='62545a@gmail.com', recipients=[email])
                 msg.body = "Thank You for registering with us " + name + "." + " Don't forget your Username: " + username + " and " "Password: " + password + "."
                 mail.send(msg)
 
