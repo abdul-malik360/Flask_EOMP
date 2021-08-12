@@ -160,10 +160,10 @@ def registration():
 
             else:
                 response['message'] = "Invalid Email Address"
-                redirect('https://optimistic-benz-002fcf.netlify.app/unsuccessful.html')
+                return redirect('https://optimistic-benz-002fcf.netlify.app/unsuccessful.html')
         except ValueError:
             response['message'] = "Invalid ID Number"
-            redirect('https://optimistic-benz-002fcf.netlify.app/unsuccessful.html')
+            return redirect('https://optimistic-benz-002fcf.netlify.app/unsuccessful.html')
         # return response
 
 
