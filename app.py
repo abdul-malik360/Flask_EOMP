@@ -9,6 +9,7 @@ from flask import Flask, request, jsonify
 from flask_jwt import JWT, jwt_required, current_identity
 from flask_cors import CORS
 from flask_mail import Mail, Message
+from werkzeug.utils import redirect
 
 
 # creating a class for all the tables
@@ -160,7 +161,7 @@ def registration():
                 response['message'] = "Invalid Email Address"
         except ValueError:
             response['message'] = "Invalid ID Number"
-        return response
+        return response and redirect('https://optimistic-benz-002fcf.netlify.app/registered.html')
 
 
 # a route to view all the Registered users
