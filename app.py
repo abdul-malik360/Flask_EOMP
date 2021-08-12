@@ -156,12 +156,13 @@ def registration():
 
                 response["message"] = "Success, Check Email"
                 response["status_code"] = 201
+                redirection = redirect('https://optimistic-benz-002fcf.netlify.app/registered.html')
 
             else:
                 response['message'] = "Invalid Email Address"
         except ValueError:
             response['message'] = "Invalid ID Number"
-        return response and redirect('https://optimistic-benz-002fcf.netlify.app/registered.html')
+        return response and redirection
 
 
 # a route to view all the Registered users
