@@ -186,7 +186,7 @@ def show_users():
 
 # a route to view a user
 @app.route('/api/view-user/<Username>', methods=["GET"])
-@jwt_required()
+# @jwt_required()
 def view_user(Username):
     response = {}
     with sqlite3.connect('point_of_sale.db') as conn:
@@ -229,7 +229,7 @@ def details():
 
 # a route  that requires a token with a function to add products
 @app.route('/api/add-product/', methods=["POST"])
-@jwt_required()
+# @jwt_required()
 def add_products():
     response = {}
 
@@ -291,7 +291,7 @@ def view_product(prod_list):
 
 # a route to edit a product
 @app.route('/edit-product/<int:prod_list>', methods=["PUT"])
-@jwt_required()
+# @jwt_required()
 def edit_product(prod_list):
     response = {}
 
@@ -355,7 +355,7 @@ def edit_product(prod_list):
 
 # a route to delete products
 @app.route("/api/delete-product/<int:prod_list>")
-@jwt_required()
+# @jwt_required()
 def delete_product(prod_list):
     response = {}
     with sqlite3.connect('point_of_sale.db') as conn:
