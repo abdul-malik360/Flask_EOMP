@@ -265,13 +265,19 @@ def show_products():
 
     with sqlite3.connect("point_of_sale.db") as conn:
         cursor = conn.cursor()
+        cursor.row_factory = sqlite3.Row
         cursor.execute("SELECT * FROM Products")
 
-        posts = cursor.fetchall()
+        products = cursor.fetchall()
+
+        data = []
+
+        for i in products:
+            data.append({u: i[u] for u in i.keys()})
 
     response['status_code'] = 200
-    response['data'] = posts
-    return response
+    response['data'] = data
+    return jsonify(response)
 
 
 # a route to view each product by it's ID
