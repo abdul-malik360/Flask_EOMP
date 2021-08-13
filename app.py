@@ -182,10 +182,10 @@ def show_users():
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM Register")
 
-        posts = cursor.fetchall()
+        all_users = cursor.fetchall()
 
     response['status_code'] = 200
-    response['data'] = posts
+    response['data'] = all_users
     return response
 
 
