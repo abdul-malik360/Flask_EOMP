@@ -12,6 +12,10 @@ from flask_mail import Mail, Message
 from werkzeug.utils import redirect
 
 
+conn = sqlite3.connect('point_of_sale.db')              # connecting sqlite to the database called point-of-sale
+cursor = conn.cursor()
+
+
 # creating a class for all the tables
 class PointOfSaleTables:
     def __init__(self):
@@ -37,6 +41,7 @@ class PointOfSaleTables:
     def products(self):
         self.conn.execute("CREATE TABLE IF NOT EXISTS Products(prod_list INTEGER PRIMARY KEY AUTOINCREMENT, "
                           "Name TEXT NOT NULL,"
+                          "Picture TEXT NOT NULL,"
                           "Type TEXT NOT NULL,"
                           "Description TEXT NOT NULL,"
                           "Price TEXT NOT NULL,"
@@ -235,6 +240,7 @@ def add_products():
 
     if request.method == "POST":
         name = request.json['Name']
+        picture = request.json['Picture']
         type = request.json['Type']
         description = request.json['Description']
         price = request.json['Price']
@@ -245,13 +251,14 @@ def add_products():
             cursor = conn.cursor()
             cursor.execute("INSERT INTO Products("
                            "Name,"
+                           "Picture,"
                            "Type,"
                            "Description,"
                            "Price,"
                            "Quantity,"
                            "Total) "
-                           "VALUES(?, ?, ?, ?, ?, ?)",
-                           (name, type, description, price, quantity, total))
+                           "VALUES(?, ?, ?, ?, ?, ?, ?)",
+                           (name, picture, type, description, price, quantity, total))
             conn.commit()
             response["status_code"] = 201
             response['description'] = "Product added successfully"
@@ -314,6 +321,16 @@ def edit_product(prod_list):
                     cursor.execute("UPDATE Products SET Name =? WHERE prod_list=?", (put_data["Name"], prod_list))
                     conn.commit()
                     response['message'] = "Name update was successful"
+                    response['status_code'] = 200
+
+            if incoming_data.get("Picture") is not None:
+                put_data["Picture"] = incoming_data.get("Picture")
+
+                with sqlite3.connect('point_of_sale.db') as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("UPDATE Products SET Picture =? WHERE prod_list=?", (put_data["Picture"], prod_list))
+                    conn.commit()
+                    response['message'] = "Picture update was successful"
                     response['status_code'] = 200
 
             if incoming_data.get("Type") is not None:
