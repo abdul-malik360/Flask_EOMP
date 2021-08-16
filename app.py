@@ -108,7 +108,7 @@ def upload_image():
                       )
     upload_result = None
     if request.method == 'POST' or request.method == 'PUT':
-        picture = request.form['Picture']
+        picture = request.files['Picture']
         app.logger.info('%s file_to_upload', picture)
         if picture:
             upload_result = cloudinary.uploader.upload(picture)
@@ -282,7 +282,7 @@ def add_products():
             response["status_code"] = 201
             response['description'] = "Product added successfully"
             # return redirect('https://optimistic-benz-002fcf.netlify.app/admin.html')
-            return response
+        return response
 
 
 # a route to view all the products added
