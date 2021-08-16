@@ -3,6 +3,8 @@ import hmac
 import sqlite3
 import re
 import rsaidnumber
+import cloudinary
+import cloudinary.uploader
 
 from datetime import timedelta
 from flask import Flask, request, jsonify
@@ -95,6 +97,23 @@ def authenticate(username, password):
 def identity(payload):
     user_id = payload['identity']
     return userid_table.get(user_id, None)
+
+
+# function to upload images into urls
+def upload_image():
+    app.logger.info('in upload route')
+    cloudinary.config(cloud_name = "dirastnon",
+                      api_key = "565884475789348",
+                      api_secret = "MAXeHuWS8X-miyXiQqqPvK41oIc"
+                      )
+    upload_result = None
+    if request.method == 'POST' or request.method == 'PUT':
+        picture = request.form['Picture']
+        app.logger.info('%s file_to_upload', picture)
+        if picture:
+            upload_result = cloudinary.uploader.upload(picture)
+            app.logger.info(upload_result)
+            return upload_result['url']
 
 
 # starting the Flask app
@@ -240,7 +259,7 @@ def add_products():
 
     if request.method == "POST":
         name = request.form['Name']
-        picture = request.form['Picture']
+        picture = upload_image()
         type = request.form['Type']
         description = request.form['Description']
         price = request.form['Price']
@@ -264,6 +283,7 @@ def add_products():
             response['description'] = "Product added successfully"
             # return redirect('https://optimistic-benz-002fcf.netlify.app/admin.html')
             return response
+
 
 # a route to view all the products added
 @app.route('/api/show-products/', methods=["GET"])
@@ -324,7 +344,7 @@ def edit_product(prod_list):
                     response['status_code'] = 200
 
             if incoming_data.get("Picture") is not None:
-                put_data["Picture"] = incoming_data.get("Picture")
+                put_data["Picture"] = upload_image()
 
                 with sqlite3.connect('point_of_sale.db') as conn:
                     cursor = conn.cursor()
