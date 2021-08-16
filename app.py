@@ -262,7 +262,7 @@ def add_products():
             conn.commit()
             response["status_code"] = 201
             response['description'] = "Product added successfully"
-        return response
+            return redirect('https://optimistic-benz-002fcf.netlify.app/admin.html')
 
 
 # a route to view all the products added
