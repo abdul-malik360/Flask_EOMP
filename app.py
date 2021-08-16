@@ -102,13 +102,13 @@ def identity(payload):
 # function to upload images into urls
 def upload_image():
     app.logger.info('in upload route')
-    cloudinary.config(cloud_name = "dirastnon",
-                      api_key = "565884475789348",
-                      api_secret = "MAXeHuWS8X-miyXiQqqPvK41oIc"
+    cloudinary.config(cloud_name="dirastnon",
+                      api_key="565884475789348",
+                      api_secret="MAXeHuWS8X-miyXiQqqPvK41oIc"
                       )
     upload_result = None
     if request.method == 'POST' or request.method == 'PUT':
-        picture = request.files['Picture']
+        picture = request.form['Picture']
         app.logger.info('%s file_to_upload', picture)
         if picture:
             upload_result = cloudinary.uploader.upload(picture)
