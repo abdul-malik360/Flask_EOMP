@@ -108,7 +108,7 @@ def upload_image():
                       )
     upload_result = None
     if request.method == 'POST' or request.method == 'PUT':
-        picture = request.files['Picture']
+        picture = request.json['Picture']
         app.logger.info('%s file_to_upload', picture)
         if picture:
             upload_result = cloudinary.uploader.upload(picture)
