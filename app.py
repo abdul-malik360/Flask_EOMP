@@ -258,12 +258,12 @@ def add_products():
     response = {}
 
     if request.method == "POST":
-        name = request.form['Name']
+        name = request.json['Name']
         picture = upload_image()
-        type = request.form['Type']
-        description = request.form['Description']
-        price = request.form['Price']
-        quantity = request.form['Quantity']
+        type = request.json['Type']
+        description = request.json['Description']
+        price = request.json['Price']
+        quantity = request.json['Quantity']
         total = float(price) * int(quantity)
 
         with sqlite3.connect('point_of_sale.db') as conn:
